@@ -10,7 +10,8 @@ begin
 	using LaTeXStrings
 	using PlutoUI
 	using LinearAlgebra
-	import Statistics: mean
+	import Statistics: mean, cov
+	using MultivariateStats
 end
 
 # ╔═╡ 14158eb0-d45c-11ea-088f-330e45412320
@@ -44,9 +45,6 @@ begin
 	end
 end
 
-# ╔═╡ da41ef8f-2c2d-46c1-9f61-75a20ffa8c7c
-using MultivariateStats
-
 # ╔═╡ 969a133a-9861-4248-92f0-757fd12f12fb
 md"# Principal Component Analysis (PCA): *A Mathematical Introduction with Physical Intuition*
 
@@ -74,7 +72,7 @@ md"## Moment of Inertia of a Ridgid Body
 
 # ╔═╡ a44d036e-a74a-4ef0-9183-9fceeaab3b1e
 begin
-	pts = points(10000)
+	pts = points(800)
     p = plot(title = "Random selection of points",
 	         xlims = (-1.1, 1.1),
 	         ylims = (-1.1, 1.1) )
@@ -112,21 +110,26 @@ Its components are defined as
 
 $$\begin{equation}
     J_{j,j'} =
+        \frac{1}{M}
         \sum_{i=1}^{N} m_{i}
         \left( ||\vec{x}_i||^2 \delta_{j,j'} - x_j^{(i)} x_{j'}^{(i)} \right)
 \end{equation}$$
 
-where $\delta_{j,j'}$ is the Kronecker delta.
+where $\delta_{j,j'}$ is the Kronecker delta and $M = \sum_{i}^{N} m_i$.
 
 After a close look, we see that $\boldsymbol{J}$ is symmetric with $J_{j,j'} = J_{j',j}$. The spectral theorem tells us that $\boldsymbol{J}$ has real eigenvalues $\lambda$ and is diagonalisable by an orthogonal matrix (orthogonally diagonalizable)."
+
+# ╔═╡ 96b8d373-3ce1-460a-a70c-3f9e026bb783
+md"---
+**Calculating the inertia matrix relative to the center of mass $\boldsymbol{J}$**"
 
 # ╔═╡ 3e6282ce-f3ba-4591-976d-0c37d14755c7
 begin
     function Js(pts::Matrix{Float64})
-		md"""Function to calculate the moment of inertia tensor $\boldsymbol{J}$"""
+		md"""Function to calculate the moment of inertia matrix $\boldsymbol{J}$"""
 		
 		J = zeros(Float64, (2, 2))
-		dot(pts[:,1], pts[:,1] )
+		
 		for k in 1:2
 			for l in k:2
 				if k == l
@@ -137,22 +140,57 @@ begin
 				end
 			end
 		end
+		J = J ./ (size(pts)[1])
 		return J
 	end
 end
 
 
-# ╔═╡ 96b8d373-3ce1-460a-a70c-3f9e026bb783
-md"Calculating the inertia matrix relative to the center of mass $\boldsymbol{J}$"
-
-# ╔═╡ fca87ca9-045c-4879-8ed1-c13d66040747
+# ╔═╡ 33fbdd79-8eae-48f9-b734-4995a9989cf0
 md"Substract the center of mass"
 
-# ╔═╡ b16a6499-7bd3-4356-9f29-3332884229e9
+# ╔═╡ 6c798871-79c4-4883-9e88-30d59bf7f2a8
 begin
 	pts[:,1] = pts[:,1] .- mean(pts[:,1])
 	pts[:,2] = pts[:,2] .- mean(pts[:,2])
 end
+
+# ╔═╡ 6b58bfb2-be89-4cd2-9c67-85ca95d02267
+J = Js(pts)
+
+# ╔═╡ ceb5be68-e5d3-49d5-9240-198c3d61990d
+md"---
+**Calculating the covariance matrix relative to the mean $\boldsymbol{C}$**"
+
+# ╔═╡ 2e1aa912-e7bd-4ffd-8060-05556a77bc8b
+md" Th Covariance matrix $\boldsymbol{C}$ for a cloud of points in Euclidean space centered around the mean is given by
+
+$$\begin{equation*}
+    \boldsymbol{C}_{n,n} = 
+        \begin{bmatrix}
+            C_{1,1} & \cdots & C_{1,n} \\
+            \vdots  & \ddots & \vdots  \\
+            C_{n,1} & \cdots & C_{n,n} 
+        \end{bmatrix}
+\end{equation*}$$
+
+Its components are defined as
+
+$$\begin{equation}
+    C_{j,j'} =
+        \frac{1}{N}
+        \sum_{i=1}^{N}
+        \left( x_j^{(i)} x_{j'}^{(i)} \right)
+\end{equation}$$."
+
+# ╔═╡ cbdf4dd7-5710-47d9-91aa-8dbae9712e26
+C = cov(pts; corrected=false)
+
+# ╔═╡ 34b01499-25d5-4d3b-ad30-1bc128be25f8
+md"---
+**Solving the Eigenvalue Problem**
+
+The structure of the matrices $\boldsymbol{J}$ and $\boldsymbol{C}$ is except for the sign of the diagonal elements the same. We will see in the following that the eigenvalues and eigenvectors will be the same."
 
 # ╔═╡ 8c8167ca-8679-4d2a-b15b-4c8f32cfb8b6
 md"A real symmetric matrix has the eigendecomposition into the product of a rotation matrix $\boldsymbol{R}$ and a diagonal matrix $\boldsymbol{\Lambda}$
@@ -174,17 +212,42 @@ The columns of the rotation matrix $\boldsymbol{R}$ define the directions of the
 are called the principal moments of inertia.
 "
 
-# ╔═╡ 6b58bfb2-be89-4cd2-9c67-85ca95d02267
-J = Js(pts)
+# ╔═╡ 51f20ae2-e0b6-410d-8783-689f6de9a025
+md"For the moment of inertia matrix $\boldsymbol{J}$, we find the Eigenvalues $\lambda$"
 
 # ╔═╡ f6e6f0ff-a6a1-4982-a931-2097481e1c19
 λ = eigvals(J)
 
+# ╔═╡ 51614ebd-e2e7-414b-b2b4-83feaa1da11a
+md"and the eigenvectors $v$"
+
 # ╔═╡ 2aa6416b-8595-4a28-b01b-0e6e5dc82989
 v = eigvecs(J)
 
+# ╔═╡ be55c1dd-0b85-4192-bbbb-2f397fae1d49
+md"For the cavariance matrix $\boldsymbol{C}$, we find the eigenvalues $\lambda_{cov}$"
+
+# ╔═╡ 79df4fbb-8386-4e44-bcff-406d5d99999a
+λ_cov = eigvals(C)
+
+# ╔═╡ 0718d931-4ff1-4611-b94f-e85130d2e783
+md"and the eigenvectors $v_{cov}$"
+
+# ╔═╡ 960295f5-f91c-4119-a1cc-0ec973eb3a57
+v_cov = eigvecs(C)
+
+# ╔═╡ 1ad77ac0-bd4c-407f-858f-6e435085d4d8
+md"In both interpretations of the cloud of data points, first as a rigid body rotating around the center of mass and second as a point cloud centered around the mean, we obtain the same eigenvalues and eigenvectors.
+
+We can calculate the scale factor which give as a measure of the ration of variance along the two principle axis."
+
 # ╔═╡ 9a7fdec6-b17b-47f1-9c81-c3d8525f227c
 scale_factor =  λ[2]/λ[1]
+
+# ╔═╡ 2f593024-6533-489e-928e-ed91ea382396
+md"---
+**Plotting the unit vectors scaled by the scalefactor**
+"
 
 # ╔═╡ e54b7b64-ebbe-426d-92fa-4959eebba826
 begin
@@ -211,47 +274,26 @@ begin
 		    arrow=true,color=:grey,linewidth=3,label="")
 end
 
-# ╔═╡ 3001be4f-0aa1-45a8-8249-36b240e32698
-begin
-    p5 = plot(title = "Rotated random selection of points",
-	         xlims = (-1.1, 1.1),
-	         ylims = (-1.1, 1.1) )
+# ╔═╡ b6c98fa0-8b40-4654-aa0c-b0204ed9e291
+md"*Figure 2. Cloud of randomly distributed data points in Euclidean space overlayed are the scaled eigenvectors (shown as grey arrow).*
 
-    scatter!(pts3[:,1], pts3[:,2],
-		     markershape = :circle,
-		     markersize = 2,
-		     markercolor = :steelblue,
-		     markerstrokecolor = :steelblue,
-		     xlabel = L"\vec{e}_1",
-	         ylabel = L"\vec{e}_2",
-		     aspect_ratio = :equal,
-		     label="Points")
+---
+"
 
-end
-
-# ╔═╡ 3f1a1d41-d62e-441f-93aa-eecccf3c3b9e
-md"Finally, the weighted covariance matrix is $\boldsymbol{K} = \boldsymbol{J}/M$ where $M$ is the total mass and the covariance weights correspond to the masses."
-
-# ╔═╡ 4eec549f-c3ee-4239-8bd3-c4309d0890d4
-M = fit(PCA, transpose(pts); method = :cov)
+# ╔═╡ 3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
+md"As a next step we use the eigenvectors and eigenvalues to rotate the data and represent it in the new basis $[\vec{b1}, \vec{b2}]$."
 
 # ╔═╡ e245203d-cceb-4243-8142-647fa9032518
 begin
-	v1 = projection(M)[1,:]
-	v2 = projection(M)[2,:]
+	M = fit(PCA, transpose(pts); method = :cov)
+	pts_rot =transpose( transform(M, transpose(pts)) )
+	sratio = scale_factor
 end
 
-# ╔═╡ 82875a63-754b-4c17-97c6-849fc011da1e
-v1, v2
-
-# ╔═╡ 6a12a283-a4b0-4ef8-a5ef-791475c6a7c1
-p_var = principalvars(M)
-
-# ╔═╡ 8ebb2645-beec-4c34-a89c-affb4d480a48
-sratio = p_var[1] / p_var[2]
-
-# ╔═╡ 26feda11-b068-4386-adaa-4af3a30d4b5a
-pts_rot =transpose( transform(M, transpose(pts)) )
+# ╔═╡ 8d9840d1-1e71-403b-8935-c6aeca8a0ee0
+md"
+---
+"
 
 # ╔═╡ 2be79841-4bfd-47d1-9c50-fd1e33a766c5
 begin
@@ -264,8 +306,8 @@ begin
 		     markersize = 2,
 		     markercolor = :steelblue,
 		     markerstrokecolor = :steelblue,
-		     xlabel = L"\vec{v}_1",
-	         ylabel = L"\vec{v}_2",
+		     xlabel = L"\vec{b}_1",
+	         ylabel = L"\vec{b}_2",
 		     aspect_ratio = :equal,
 		     label="Points")
 		plot!( [0.0, 0.0],
@@ -276,6 +318,12 @@ begin
 		   [0.0, 0.0],
 		    arrow=true,color=:grey,linewidth=3,label="")
 end
+
+# ╔═╡ 9a90438b-67c2-4024-bf45-696d60b718df
+md"*Figure 3. Cloud of randomly distributed data points in Euclidean space rotated and represented in the basis $\vec{b}_1$ and $\vec{b}_2$.*
+
+---
+"
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1203,25 +1251,33 @@ version = "0.9.1+5"
 # ╟─a44d036e-a74a-4ef0-9183-9fceeaab3b1e
 # ╟─075b42b8-476b-4436-a886-dcbb082b0ad7
 # ╟─dea2966d-79e7-4af7-9a23-8fc6bb0f258c
-# ╠═3e6282ce-f3ba-4591-976d-0c37d14755c7
 # ╟─96b8d373-3ce1-460a-a70c-3f9e026bb783
-# ╟─fca87ca9-045c-4879-8ed1-c13d66040747
-# ╠═b16a6499-7bd3-4356-9f29-3332884229e9
-# ╟─8c8167ca-8679-4d2a-b15b-4c8f32cfb8b6
+# ╠═3e6282ce-f3ba-4591-976d-0c37d14755c7
+# ╟─33fbdd79-8eae-48f9-b734-4995a9989cf0
+# ╠═6c798871-79c4-4883-9e88-30d59bf7f2a8
 # ╠═6b58bfb2-be89-4cd2-9c67-85ca95d02267
+# ╟─ceb5be68-e5d3-49d5-9240-198c3d61990d
+# ╟─2e1aa912-e7bd-4ffd-8060-05556a77bc8b
+# ╠═cbdf4dd7-5710-47d9-91aa-8dbae9712e26
+# ╟─34b01499-25d5-4d3b-ad30-1bc128be25f8
+# ╟─8c8167ca-8679-4d2a-b15b-4c8f32cfb8b6
+# ╟─51f20ae2-e0b6-410d-8783-689f6de9a025
 # ╠═f6e6f0ff-a6a1-4982-a931-2097481e1c19
+# ╟─51614ebd-e2e7-414b-b2b4-83feaa1da11a
 # ╠═2aa6416b-8595-4a28-b01b-0e6e5dc82989
+# ╟─be55c1dd-0b85-4192-bbbb-2f397fae1d49
+# ╠═79df4fbb-8386-4e44-bcff-406d5d99999a
+# ╟─0718d931-4ff1-4611-b94f-e85130d2e783
+# ╠═960295f5-f91c-4119-a1cc-0ec973eb3a57
+# ╟─1ad77ac0-bd4c-407f-858f-6e435085d4d8
 # ╠═9a7fdec6-b17b-47f1-9c81-c3d8525f227c
+# ╟─2f593024-6533-489e-928e-ed91ea382396
 # ╟─e54b7b64-ebbe-426d-92fa-4959eebba826
-# ╠═3001be4f-0aa1-45a8-8249-36b240e32698
-# ╟─3f1a1d41-d62e-441f-93aa-eecccf3c3b9e
-# ╠═da41ef8f-2c2d-46c1-9f61-75a20ffa8c7c
-# ╠═4eec549f-c3ee-4239-8bd3-c4309d0890d4
-# ╠═e245203d-cceb-4243-8142-647fa9032518
-# ╠═82875a63-754b-4c17-97c6-849fc011da1e
-# ╠═6a12a283-a4b0-4ef8-a5ef-791475c6a7c1
-# ╠═8ebb2645-beec-4c34-a89c-affb4d480a48
-# ╠═26feda11-b068-4386-adaa-4af3a30d4b5a
+# ╟─b6c98fa0-8b40-4654-aa0c-b0204ed9e291
+# ╟─3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
+# ╟─e245203d-cceb-4243-8142-647fa9032518
+# ╟─8d9840d1-1e71-403b-8935-c6aeca8a0ee0
 # ╟─2be79841-4bfd-47d1-9c50-fd1e33a766c5
+# ╟─9a90438b-67c2-4024-bf45-696d60b718df
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
