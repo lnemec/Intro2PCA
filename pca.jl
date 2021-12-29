@@ -4,6 +4,16 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
 # ╔═╡ 1cdb4e08-99f7-48d9-924b-e105d1b266dc
 begin
     using Plots
@@ -12,70 +22,122 @@ begin
 	using LinearAlgebra
 	import Statistics: mean, cov
 	using MultivariateStats
-end
-
-# ╔═╡ 14158eb0-d45c-11ea-088f-330e45412320
-begin
 	using Random
-	function points(n::Int)
-		R = 1.0
-		angle = 132. * π/180.
-		
-		rotate = [cos(angle) -sin(angle);
-			      sin(angle)  cos(angle)]
-		
-		array0 = zeros(Float64, (n, 2))
-		pts = zeros(Float64, (n, 2))
-		
-		rnd_array = randn!(MersenneTwister(211114), array0)
-		
-		#r = R * sqrt.(rnd_array[:,1])
-		r = R * rnd_array[:,1]
-		theta = rnd_array[:,2] * 2 * pi
-		
-		pts[:,1] = r .* cos.(theta)
-		pts[:,2] = r .* sin.(theta) .* 0.25
 
-		pts_rot = pts * rotate
-		
-		pts_rot[:,1] = pts_rot[:,1]
-		pts_rot[:,2] = pts_rot[:,2]
-		
-		return pts_rot
-	end
+	rng = MersenneTwister(211114)
+
+	md"""**Import julia libraries**"""
 end
 
 # ╔═╡ 969a133a-9861-4248-92f0-757fd12f12fb
-md"# Principal Component Analysis (PCA): *A Mathematical Introduction with Physical Intuition*
+md"# Principal Component Analysis (PCA): *A Physically Intuitive Mathematical Introduction*
 
-The principal component analysis (PCA) rotates a cloud of data points in Euclidean space such that the maximum variability is along the principal axis. In mathematical terms, the PCA is an orthogonal linear transformation that performs a change of basis representing the data. The principal axis theorem ensures that a orthogonal basis exists and can be found. As a result the data is represented in a new coordinate system. After the change of basis, the largest variance is along the first basis vector (the so-called first principal component).
+The principal component analysis (PCA) involves rotating a cloud of data points in Euclidean space such that the variance is maximal along the first axis (the so-called first principal component). The principal axis theorem ensures that the data can be rotated in such a way. In mathematical terms the PCA is a coordinate transformation, or equivalently, a change of basis or orthogonal linear transformation.
 
-If you look at the mathematical structure of the PCA with the eyes of a physicist, you will recognise it from your first year mechanics lectures. As a Data Scientist, even if you do not have a background in physics, you will greatly benefit from the geometric understanding behind the PCA.
+The mathematics behind the PCA are found again in the description of rotations of rigid bodies. This physical interpretation is instructive in understanding the PCA.
 
 ## Moment of Inertia $\boldsymbol{J}$
 
-The moment of inertia $\boldsymbol{J}$, also called rotational inertia, of a rigid body determines the torque required for a desired angular acceleration around a rotational axis. It depends on the mass distribution of the body and the selected rotation axis. Larger moments of inertia $\boldsymbol{J}$ requiring more torque to change the body's rate of rotation. For the same rigid body different axes of rotation will have different moments of inertia to rotate around those axes.
+The moment of inertia $\boldsymbol{J}$ of a rigid body, also called rotational inertia, determines the torque required for a desired angular acceleration around an axis of rotation. It depends on the mass distribution of the body and the selected axis of rotation. A body with a larger moment of inertia $\boldsymbol{J}$ requires more torque to change the body's rate of rotation. For the same rigid body different axes of rotation will have different moments of inertia associated with them. In other words, it depends on the body's mass distribution and the axis chosen, with larger moments requiring more torque to change the body's rotation rate.
 
-| ![Rolling cylinder with different moment of inertia](https://upload.wikimedia.org/wikipedia/commons/9/95/RollingVsInertia.gif) | 
+| ![Rolling cylinder with different moments of inertia](https://upload.wikimedia.org/wikipedia/commons/9/95/RollingVsInertia.gif) | 
 |:--:| 
-| *The six cylinder have the mass but differ in moment of inertia $\boldsymbol{J}$. They role down the slope. The cylinder with the lower moment of inertia rolls down the slope with a higher acceleration.  ([Image taken from wikipedia](https://en.wikipedia.org/wiki/File:RollingVsInertia.gif))* |
-
+| *The six cylinders have the same mass but different moments of inertia $\boldsymbol{J}$. As they role down the slope, cylinders with lower moments of inertia accelerate more quickly.  ([Image taken from wikipedia](https://en.wikipedia.org/wiki/File:RollingVsInertia.gif))* |
 "
 
 # ╔═╡ 03664f5c-d45c-11ea-21b6-91cd647a07aa
 md"## Moment of Inertia of a Ridgid Body
 
-*Figure 1* shows a cloud of $N$ randomly distributed data points in Euclidean space $\mathbb{R}^n$ with coordinates $\{ \vec{x}^{(1)}, \vec{x}^{(2)},\dots, \vec{x}^{(N)} \}$. In our example, the space is 2-dimensional $\mathbb{R}^2$. The point $\vec{x}^{(1)}= [x_1^{(1)}, x_2^{(1)}]$ has the mass $m_i$ with $i = [1,\dots,N]$.
+*Figure 1* shows a cloud of $N$ randomly distributed data points in Euclidean space $\mathbb{R}^n$ with coordinates $\{ \vec{x}^{(1)}, \vec{x}^{(2)},\dots, \vec{x}^{(N)} \}$. In our example, $N=2$ the space is the 2-dimensional $\mathbb{R}^2$. The point $\vec{x}^{(1)}= [x_1^{(1)}, x_2^{(1)}]$ has the mass $m_i$ with $i = [1,\dots,N]$.
 
----
+For a rigid object of $N$ point masses $m_i$ in $\mathbb{R}^n$, the moment of inertia tensor $\boldsymbol{J}$ is given by
+
+$$\begin{equation*}
+    \boldsymbol{J} = 
+        \begin{bmatrix}
+            J_{1,1} & \cdots & J_{1,n} \\
+            \vdots  & \ddots & \vdots  \\
+            J_{n,1} & \cdots & J_{n,n} 
+        \end{bmatrix}
+\end{equation*}$$
+
+Its components are defined as
+
+$$\begin{equation}
+    J_{j,j'} =
+        \frac{1}{M}
+        \sum_{i=1}^{N} m_{i}
+        \left( ||\vec{x}^{(i)}||^2 \delta_{j,j'} - x_j^{(i)} x_{j'}^{(i)} \right)
+\end{equation}$$
+
+where $\delta_{j,j'}$ is the Kronecker delta and $M = \sum_{i}^{N} m_i$ is the total mass. Note that, here, the moment of inertia is normalised by the total mass. In physiscs, the moment of inertia would not commonly be normalised like this.
+
+Looking closer, we see that $\boldsymbol{J}$ is symmetric with $J_{j,j'} = J_{j',j}$. The spectral theorem tells us that $\boldsymbol{J}$ has real eigenvalues $\lambda$ and is diagonalisable by an orthogonal matrix (orthogonally diagonalizable).
+
 "
+
+# ╔═╡ 624fcb2a-8446-42c2-863f-e285f2c1fd86
+begin
+	N_slider = @bind N html"<input type=range min=10 max=1000 step=10>"
+	R1_slider = @bind R1 html"<input type=range min=0.1 max=10 step=0.1>"
+	R2_slider = @bind R2 html"<input type=range min=0.1 max=10 step=0.1>"
+	angle_slider = @bind angle html"<input type=range min=0.0 max=3.14 step=0.01>"
+	
+	md"""## Define parameters to generate sample data
+		
+	"""
+end
+
+# ╔═╡ 5619b1f9-38d1-42de-bd81-708567e2fa96
+md"""
+**Define Parameters:**
+
+|       | Min | Slider        | Max   |
+|-------|-----|:-------------:|-------|
+| N     | 10  | $(N_slider)   | 1000  |
+| R1    | 0.1 | $(R1_slider)  | 10    |
+| R2    | 0.1 | $(R2_slider)  | 10    |
+| angle | 0.0 |$(angle_slider)| π     |
+"""
+
+# ╔═╡ 24f9bdd6-0337-4a23-9373-cfecabc2b029
+begin
+	Rmax = max(R1, R2)
+	
+	md"""
+	
+	N defines the number of points of the sample data. R1 and R2 define the
+	variance of the data and angle rotates the sample data in space.
+
+	| Variable | N  | R1  | R2  | angle | Rmax |
+	|----------|----|-----|-----|-------|------|
+	|**Values**| $(N) | $(R1) | $(R2) | $(round(rad2deg(angle), digits=2) ) |$(Rmax) |
+	"""
+end
+
+# ╔═╡ eacd1340-79af-4985-bf60-b8db8a380a20
+begin
+	rot = [cos(angle)  sin(angle);
+		  -sin(angle) cos(angle)]
+	
+	pts = randn(rng, N, 3)
+	pts[:, 1] .*= R1
+	pts[:, 2] .*= R2
+
+	pts[:, 1:2] = pts[:, 1:2] * rot
+	
+	md"""Create $2$-dim array with sample data based on parameters defined in table above.
+	
+	---
+	"""
+	
+end
 
 # ╔═╡ a44d036e-a74a-4ef0-9183-9fceeaab3b1e
 begin
-	pts = points(800)
     p = plot(title = "Random selection of points",
-	         xlims = (-1.1, 1.1),
-	         ylims = (-1.1, 1.1) )
+	         xlims = (-3 * Rmax, 3 * Rmax),
+	         ylims = (-3 * Rmax, 3 * Rmax) )
 	          
     scatter!(pts[:,1], pts[:,2],
 		     markershape = :circle,
@@ -94,57 +156,34 @@ md"*Figure 1. Cloud of randomly distributed data points in Euclidean space $\mat
 ---
 "
 
-# ╔═╡ dea2966d-79e7-4af7-9a23-8fc6bb0f258c
-md" For a rigid object of $N$ point masses $m_i$, the moment of inertia tensor $\boldsymbol{J}$ is given by
-
-$$\begin{equation*}
-    \boldsymbol{J}_{n,n} = 
-        \begin{bmatrix}
-            J_{1,1} & \cdots & J_{1,n} \\
-            \vdots  & \ddots & \vdots  \\
-            J_{n,1} & \cdots & J_{n,n} 
-        \end{bmatrix}
-\end{equation*}$$
-
-Its components are defined as
-
-$$\begin{equation}
-    J_{j,j'} =
-        \frac{1}{M}
-        \sum_{i=1}^{N} m_{i}
-        \left( ||\vec{x}_i||^2 \delta_{j,j'} - x_j^{(i)} x_{j'}^{(i)} \right)
-\end{equation}$$
-
-where $\delta_{j,j'}$ is the Kronecker delta and $M = \sum_{i}^{N} m_i$.
-
-After a close look, we see that $\boldsymbol{J}$ is symmetric with $J_{j,j'} = J_{j',j}$. The spectral theorem tells us that $\boldsymbol{J}$ has real eigenvalues $\lambda$ and is diagonalisable by an orthogonal matrix (orthogonally diagonalizable)."
-
 # ╔═╡ 96b8d373-3ce1-460a-a70c-3f9e026bb783
-md"---
-**Calculating the inertia matrix relative to the center of mass $\boldsymbol{J}$**"
+md"**Calculating the Moment of Inertia Matrix $\boldsymbol{J}$ Relative to the Center of Mass**"
+
+# ╔═╡ eaa487b9-2728-49f8-8b5e-003926f4d544
+δ(i, j) = i == j ? 1 : 0
 
 # ╔═╡ 3e6282ce-f3ba-4591-976d-0c37d14755c7
-begin
-    function Js(pts::Matrix{Float64})
-		md"""Function to calculate the moment of inertia matrix $\boldsymbol{J}$"""
-		
-		J = zeros(Float64, (2, 2))
-		
-		for k in 1:2
-			for l in k:2
-				if k == l
-					J[k,l] = dot(pts[:,k], pts[:,l] )
-				else
-					J[k,l] = -dot(pts[:,k], pts[:,l])
-					J[l,k] = J[k,l]
-				end
-			end
-		end
-		J = J ./ (size(pts)[1])
-		return J
-	end
-end
+"""
+	calcJ(pts::AbstractMatrix)
 
+Function to calculate the moment of inertia matrix ``\\boldsymbol{J}``
+"""
+function calcJ(pts::AbstractMatrix)
+	N, n = size(pts)
+	J = zeros(Float64, n, n)
+	
+	for j1 in 1:n
+		for j2 in j1:n
+			J[j1, j2] = sum(1:N) do i
+				norm(pts[i, :])^2 * δ(j1, j2) - pts[i, j1] * pts[i, j2]
+			end
+
+			J[j2, j1] = J[j1, j2]
+		end
+	end
+
+	return J ./ N
+end
 
 # ╔═╡ 33fbdd79-8eae-48f9-b734-4995a9989cf0
 md"Substract the center of mass"
@@ -153,20 +192,21 @@ md"Substract the center of mass"
 begin
 	pts[:,1] = pts[:,1] .- mean(pts[:,1])
 	pts[:,2] = pts[:,2] .- mean(pts[:,2])
+	pts[:,3] = pts[:,3] .- mean(pts[:,3])
 end
 
 # ╔═╡ 6b58bfb2-be89-4cd2-9c67-85ca95d02267
-J = Js(pts)
+J = calcJ(pts)
 
 # ╔═╡ ceb5be68-e5d3-49d5-9240-198c3d61990d
 md"---
-**Calculating the covariance matrix relative to the mean $\boldsymbol{C}$**"
+**Calculating the Covariance Matrix $\boldsymbol{C}$ Relative to the Mean**"
 
 # ╔═╡ 2e1aa912-e7bd-4ffd-8060-05556a77bc8b
-md" Th Covariance matrix $\boldsymbol{C}$ for a cloud of points in Euclidean space centered around the mean is given by
+md" The Covariance matrix $\boldsymbol{C}$ for a cloud of points in Euclidean space centered around the mean is given by
 
 $$\begin{equation*}
-    \boldsymbol{C}_{n,n} = 
+    \boldsymbol{C} = 
         \begin{bmatrix}
             C_{1,1} & \cdots & C_{1,n} \\
             \vdots  & \ddots & \vdots  \\
@@ -190,7 +230,7 @@ C = cov(pts; corrected=false)
 md"---
 **Solving the Eigenvalue Problem**
 
-The structure of the matrices $\boldsymbol{J}$ and $\boldsymbol{C}$ is except for the sign of the diagonal elements the same. We will see in the following that the eigenvalues and eigenvectors will be the same."
+The structure of the matrices $\boldsymbol{J}$ and $\boldsymbol{C}$ is the same except for the sign of the off-diagonal elements. We will see in the following that the eigenvalues and eigenvectors will be the same."
 
 # ╔═╡ 8c8167ca-8679-4d2a-b15b-4c8f32cfb8b6
 md"A real symmetric matrix has the eigendecomposition into the product of a rotation matrix $\boldsymbol{R}$ and a diagonal matrix $\boldsymbol{\Lambda}$
@@ -213,47 +253,33 @@ are called the principal moments of inertia.
 "
 
 # ╔═╡ 51f20ae2-e0b6-410d-8783-689f6de9a025
-md"For the moment of inertia matrix $\boldsymbol{J}$, we find the Eigenvalues $\lambda$"
+md"For the moment of inertia matrix $\boldsymbol{J}$, we find the Eigenvalues $\lambda$ and the eigenvectors $v$"
 
-# ╔═╡ f6e6f0ff-a6a1-4982-a931-2097481e1c19
-λ = eigvals(J)
-
-# ╔═╡ 51614ebd-e2e7-414b-b2b4-83feaa1da11a
-md"and the eigenvectors $v$"
-
-# ╔═╡ 2aa6416b-8595-4a28-b01b-0e6e5dc82989
-v = eigvecs(J)
+# ╔═╡ 4b47a6af-3c41-4575-a576-09145c535e22
+λ, v = eigen(J; sortby=-)
 
 # ╔═╡ be55c1dd-0b85-4192-bbbb-2f397fae1d49
-md"For the cavariance matrix $\boldsymbol{C}$, we find the eigenvalues $\lambda_{cov}$"
+md"For the cavariance matrix $\boldsymbol{C}$, we find the eigenvalues $\lambda_{cov}$ and the eigenvectors $v_{cov}$"
 
-# ╔═╡ 79df4fbb-8386-4e44-bcff-406d5d99999a
-λ_cov = eigvals(C)
-
-# ╔═╡ 0718d931-4ff1-4611-b94f-e85130d2e783
-md"and the eigenvectors $v_{cov}$"
-
-# ╔═╡ 960295f5-f91c-4119-a1cc-0ec973eb3a57
-v_cov = eigvecs(C)
+# ╔═╡ d283412a-a3a3-458c-aa8b-63e1c4f3bf15
+λ_cov, v_cov = eigen(C; sortby=-)
 
 # ╔═╡ 1ad77ac0-bd4c-407f-858f-6e435085d4d8
-md"In both interpretations of the cloud of data points, first as a rigid body rotating around the center of mass and second as a point cloud centered around the mean, we obtain the same eigenvalues and eigenvectors.
-
-We can calculate the scale factor which give as a measure of the ration of variance along the two principle axis."
+md"In both interpretations of the cloud of data points, first as a rigid body rotating around the center of mass and second as a point cloud centered around the mean, we obtain the same eigenvalues and eigenvectors."
 
 # ╔═╡ 9a7fdec6-b17b-47f1-9c81-c3d8525f227c
-scale_factor =  λ[2]/λ[1]
+scale_factor =  λ[1]/λ[2]
 
 # ╔═╡ 2f593024-6533-489e-928e-ed91ea382396
 md"---
-**Plotting the unit vectors scaled by the scalefactor**
+**Plotting the Unit Vectors Scaled by the Scale Factor**
 "
 
 # ╔═╡ e54b7b64-ebbe-426d-92fa-4959eebba826
 begin
     p1 = plot(title = "Random selection of points",
-	         xlims = (-1.1, 1.1),
-	         ylims = (-1.1, 1.1) )
+	         xlims = (-3 * Rmax, 3 * Rmax),
+	         ylims = (-3 * Rmax, 3 * Rmax) )
 	
     scatter!(pts[:,1], pts[:,2],
 		     markershape = :circle,
@@ -265,17 +291,17 @@ begin
 		     aspect_ratio = :equal,
 		     label="Points")
 
-	plot!( [0, v[2,1]],
-		   [0, v[1,1]],
+	plot!( [0, v[1,1] * scale_factor],
+		   [0, v[2,1] * scale_factor],
 		    arrow=true,color=:grey,linewidth=3,label="")
 	
-	plot!( [0, v[2,2]/scale_factor],
-		   [0, v[1,2]/scale_factor],
+	plot!( [0, v[1,2] * sqrt(λ[1])],
+		   [0, v[2,2] * sqrt(λ[1])],
 		    arrow=true,color=:grey,linewidth=3,label="")
 end
 
 # ╔═╡ b6c98fa0-8b40-4654-aa0c-b0204ed9e291
-md"*Figure 2. Cloud of randomly distributed data points in Euclidean space overlayed are the scaled eigenvectors (shown as grey arrow).*
+md"*Figure 2. Cloud of randomly distributed data points in Euclidean space. Overlayed are the scaled eigenvectors (shown as grey arrows).*
 
 ---
 "
@@ -283,12 +309,8 @@ md"*Figure 2. Cloud of randomly distributed data points in Euclidean space overl
 # ╔═╡ 3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
 md"As a next step we use the eigenvectors and eigenvalues to rotate the data and represent it in the new basis $[\vec{b1}, \vec{b2}]$."
 
-# ╔═╡ e245203d-cceb-4243-8142-647fa9032518
-begin
-	M = fit(PCA, transpose(pts); method = :cov)
-	pts_rot =transpose( transform(M, transpose(pts)) )
-	sratio = scale_factor
-end
+# ╔═╡ fd8ce478-87a8-48aa-b8d1-df80df93254b
+pts_rot = pts * v
 
 # ╔═╡ 8d9840d1-1e71-403b-8935-c6aeca8a0ee0
 md"
@@ -298,8 +320,8 @@ md"
 # ╔═╡ 2be79841-4bfd-47d1-9c50-fd1e33a766c5
 begin
     p2 = plot(title = "Random selection of points",
-	         xlims = (-1.1, 1.1),
-	         ylims = (-1.1, 1.1) )
+	         xlims = (-3 * Rmax, 3 * Rmax),
+	         ylims = (-3 * Rmax, 3 * Rmax) )
 	
     scatter!(pts_rot[:,1], pts_rot[:,2],
 		     markershape = :circle,
@@ -310,12 +332,13 @@ begin
 	         ylabel = L"\vec{b}_2",
 		     aspect_ratio = :equal,
 		     label="Points")
-		plot!( [0.0, 0.0],
-		       [0.0, 1/sratio],
+
+	plot!( [0, sqrt(λ[1])],
+		   [0.0, 0.0],
 		    arrow=true,color=:grey,linewidth=3,label="")
 	
-	plot!( [0.0, 1],
-		   [0.0, 0.0],
+	plot!( [0, 0.0],
+		   [0, sqrt(λ[2])],
 		    arrow=true,color=:grey,linewidth=3,label="")
 end
 
@@ -388,9 +411,9 @@ version = "1.0.8+0"
 
 [[Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "f2202b55d816427cd385a9a4f3ffb226bee80f99"
+git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
-version = "1.16.1+0"
+version = "1.16.1+1"
 
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
@@ -562,9 +585,9 @@ version = "0.21.0+0"
 
 [[Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "7bf67e9a481712b3dbe9cb3dac852dc4b1162e02"
+git-tree-sha1 = "a32d672ac2c967f3deb8a81d828afc739c838a06"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.68.3+0"
+version = "2.68.3+2"
 
 [[Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -585,9 +608,9 @@ version = "0.9.16"
 
 [[HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
-git-tree-sha1 = "8a954fed8ac097d5be04921d595f741115c1b2ad"
+git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
-version = "2.8.1+0"
+version = "2.8.1+1"
 
 [[Hyperscript]]
 deps = ["Test"]
@@ -699,9 +722,9 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "761a393aeccd6aa92ec3515e428c26bf99575b3b"
+git-tree-sha1 = "0b4a5d71f3e5200a7dff793393e09dfc2d874290"
 uuid = "e9f186c6-92d2-5b65-8a66-fee21dc1b490"
-version = "3.2.2+0"
+version = "3.2.2+1"
 
 [[Libgcrypt_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll", "Pkg"]
@@ -1245,16 +1268,19 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╟─1cdb4e08-99f7-48d9-924b-e105d1b266dc
-# ╟─14158eb0-d45c-11ea-088f-330e45412320
 # ╟─969a133a-9861-4248-92f0-757fd12f12fb
 # ╟─03664f5c-d45c-11ea-21b6-91cd647a07aa
+# ╟─624fcb2a-8446-42c2-863f-e285f2c1fd86
+# ╟─5619b1f9-38d1-42de-bd81-708567e2fa96
+# ╟─24f9bdd6-0337-4a23-9373-cfecabc2b029
+# ╟─eacd1340-79af-4985-bf60-b8db8a380a20
 # ╟─a44d036e-a74a-4ef0-9183-9fceeaab3b1e
 # ╟─075b42b8-476b-4436-a886-dcbb082b0ad7
-# ╟─dea2966d-79e7-4af7-9a23-8fc6bb0f258c
 # ╟─96b8d373-3ce1-460a-a70c-3f9e026bb783
-# ╠═3e6282ce-f3ba-4591-976d-0c37d14755c7
+# ╟─eaa487b9-2728-49f8-8b5e-003926f4d544
+# ╟─3e6282ce-f3ba-4591-976d-0c37d14755c7
 # ╟─33fbdd79-8eae-48f9-b734-4995a9989cf0
-# ╠═6c798871-79c4-4883-9e88-30d59bf7f2a8
+# ╟─6c798871-79c4-4883-9e88-30d59bf7f2a8
 # ╠═6b58bfb2-be89-4cd2-9c67-85ca95d02267
 # ╟─ceb5be68-e5d3-49d5-9240-198c3d61990d
 # ╟─2e1aa912-e7bd-4ffd-8060-05556a77bc8b
@@ -1262,22 +1288,18 @@ version = "0.9.1+5"
 # ╟─34b01499-25d5-4d3b-ad30-1bc128be25f8
 # ╟─8c8167ca-8679-4d2a-b15b-4c8f32cfb8b6
 # ╟─51f20ae2-e0b6-410d-8783-689f6de9a025
-# ╠═f6e6f0ff-a6a1-4982-a931-2097481e1c19
-# ╟─51614ebd-e2e7-414b-b2b4-83feaa1da11a
-# ╠═2aa6416b-8595-4a28-b01b-0e6e5dc82989
+# ╠═4b47a6af-3c41-4575-a576-09145c535e22
 # ╟─be55c1dd-0b85-4192-bbbb-2f397fae1d49
-# ╠═79df4fbb-8386-4e44-bcff-406d5d99999a
-# ╟─0718d931-4ff1-4611-b94f-e85130d2e783
-# ╠═960295f5-f91c-4119-a1cc-0ec973eb3a57
+# ╠═d283412a-a3a3-458c-aa8b-63e1c4f3bf15
 # ╟─1ad77ac0-bd4c-407f-858f-6e435085d4d8
 # ╠═9a7fdec6-b17b-47f1-9c81-c3d8525f227c
 # ╟─2f593024-6533-489e-928e-ed91ea382396
-# ╟─e54b7b64-ebbe-426d-92fa-4959eebba826
+# ╠═e54b7b64-ebbe-426d-92fa-4959eebba826
 # ╟─b6c98fa0-8b40-4654-aa0c-b0204ed9e291
 # ╟─3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
-# ╟─e245203d-cceb-4243-8142-647fa9032518
+# ╠═fd8ce478-87a8-48aa-b8d1-df80df93254b
 # ╟─8d9840d1-1e71-403b-8935-c6aeca8a0ee0
-# ╟─2be79841-4bfd-47d1-9c50-fd1e33a766c5
+# ╠═2be79841-4bfd-47d1-9c50-fd1e33a766c5
 # ╟─9a90438b-67c2-4024-bf45-696d60b718df
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
