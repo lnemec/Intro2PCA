@@ -32,6 +32,8 @@ end
 begin
     rng = MersenneTwister(220115)
     Base.show(io::IO, f::Float64) = @printf io "%1.2f" f
+
+	md"""Set the random seed and change the format of floating numbers for showing arrays."""
 end
 
 # ╔═╡ 969a133a-9861-4248-92f0-757fd12f12fb
@@ -46,7 +48,7 @@ begin
 	N_slider = @bind N html"<input type=range min=10 max=1000 step=10 value = 500>"
 	R1_slider = @bind R1 html"<input type=range min=0.1 max=10 step=0.1 value=4.0>"
 	R2_slider = @bind R2 html"<input type=range min=0.1 max=10 step=0.1 value=8.5>"
-	angle_slider = @bind angle html"<input type=range min=0.0 max=180.0 step=0.01 value=45.0>"
+	angle_slider = @bind angle html"<input type=range min=0.0 max=180.0 step=0.01 value=35.0>"
 	
 	md"""## Define parameters to generate sample data
 		
@@ -54,7 +56,7 @@ begin
 end
 
 # ╔═╡ d8005539-13d5-4a3a-ad62-861c4f4bb9e0
-md"First, we will generate a cloud of $N$ randomly distributed data points in Euclidean space $\mathbb{R}^n$ with coordinates $\{ \vec{x}^{(1)}, \vec{x}^{(2)},\dots, \vec{x}^{(N)} \} = X$. We will demonstrate the concept based on $3$-dimensional data, where $n=3$ and $X \subset \mathbb{R}^3$ with basis vectors $\vec{e}_1$ and $\vec{e}_2$ centered around the origin $(0, 0, 0)$. For simplicity, we will set all coordinates along the basis vector $\vec{e}_3$ to zero. It will allow us to visualise the data in the $\vec{e}_1$ and $\vec{e}_2$ plane."
+md"First, we will generate a cloud of $N$ randomly distributed data points in Euclidean space $\mathbb{R}^n$ with coordinates $\{ \vec{x}^{(1)}, \vec{x}^{(2)},\dots, \vec{x}^{(N)} \} = X$. We will demonstrate the concept based on $3$-dimensional data, where $n=3$ and $X \subset \mathbb{R}^3$ with basis vectors $\vec{e}_1$, $\vec{e}_2$ and $\vec{e}_3$ centered around the origin $(0, 0, 0)$. For simplicity, we will set all coordinates along the basis vector $\vec{e}_3$ to zero. It will allow us to visualise the data in the $\vec{e}_1$ and $\vec{e}_2$ plane."
 
 # ╔═╡ 5619b1f9-38d1-42de-bd81-708567e2fa96
 md"""
@@ -106,11 +108,11 @@ end
 begin
 	lim = [-3 * Rmax, 3 * Rmax]
 	
-	u1 = [0.0 0.0; lim[2] lim[2]*tan(deg2rad(angle))]
+	u1 = [0.0 0.0; lim[2] lim[2]*tan(deg2rad(angle+90.0))]
 	u1[2,:] = normalize!(u1[2,:])
 	ann1 = (u1[2,1].*2.5*Rmax, u1[2,2].*2.5*Rmax, Plots.text(L"$\mathbf{\vec{u}_1}$", :left))
 	
-	u2 = [0.0 0.0; lim[2] lim[2]*tan(deg2rad(angle+90.0))]
+	u2 = [0.0 0.0; lim[2] lim[2]*tan(deg2rad(angle))]
 	u2[2,:] = normalize!(u2[2,:])
 	ann2 = (u2[2,1].*2.5*Rmax, u2[2,2].*2.5*Rmax, Plots.text(L"$\mathbf{\vec{u}_2}$", :left))
 	
@@ -189,7 +191,7 @@ md"## Moment of Inertia $\boldsymbol{J}$
 
 The moment of inertia $\boldsymbol{J}$ of a rigid body, also called rotational inertia, determines the torque required for a desired angular acceleration around an axis of rotation. It depends on the mass distribution of the body and the selected axis of rotation. A body with a larger moment of inertia $\boldsymbol{J}$ requires more torque to change the body's rate of rotation. For the same rigid body, different axes of rotation will have different moments of inertia associated with them. In other words, it depends on the body's mass distribution and the axis chosen, with larger moments requiring more torque to change the body's rotation rate.
 
-All moments of inertia of a rigid body can be summarised by a tensor. In general, it can be determined with respect to any point in space. For simplicity, we will calculate the moment of inertia with respect to the center of mass.
+All moments of inertia of a rigid body can be summarised by a matrix. In general, it can be determined with respect to any point in space. For simplicity, we will calculate the moment of inertia with respect to the center of mass.
 
 The principal axes of the body, also known as figure axes, and the principal moments of inertia can be found by rotating the cloud of point masses. In mathematical terms, the principal moments are calculated by a coordinate transformation, or equivalently, a change of basis or orthogonal linear transformation.
 
@@ -228,7 +230,7 @@ begin
 		 legend = false,
 		 size = (600, 310))
 
-	plot!(lim, lim*tan(deg2rad(angle)),
+	plot!(lim, lim*tan(deg2rad(angle+90.0)),
 		  color="#a6a6a6",
 		  label="",
 		  annotations = ann1,
@@ -243,7 +245,7 @@ begin
 		   arrow=true,color="#6a0000",linewidth=3,label="")
 	
 	
-	plot!(lim, lim*tan(deg2rad(angle+90.0)),
+	plot!(lim, lim*tan(deg2rad(angle)),
 		  color="#a6a6a6",
 		  label="",
 		  annotations = ann2,
@@ -268,7 +270,7 @@ md" *Figure 3. a) PCA: The first principal component $\vec{u}_1$ is along the ax
 # ╔═╡ 2f20596e-efa9-4d00-9769-6e8689c99f05
 md"With the visual support of *Figure 1* and *3*, we expect that the principal axes of the PCA and Moment of Inertia are the same. However, the value of the largest principal component and principal moment of inertia will differ for most sets of data points.
 
-> *Note:* In physics, the moment of inertia is defined for a $3$-dimensional rigid body. For simplicity, we projected the data into the plane spanned by $\vec{e}_1$ and $\vec{e}_2$. Then, the plane with the maximal spread of mass points is the $\vec{e}_1 \times \vec{e}_2$ in our example. The principal axis corresponding to the largest moment is pointing out of the plane along $\vec{e}_3$ and is orthogonal to $\vec{u}_1$ and $\vec{u}_2$.
+> *Note:* In physics, the moment of inertia is defined for a $3$-dimensional rigid body. For simplicity, we projected the data into the plane spanned by $\vec{e}_1$ and $\vec{e}_2$. In our example, the plane with the maximal spread of mass points is then spaned by $\vec{e}_1 \times \vec{e}_2$. The principal axis corresponding to the largest moment is pointing out of the plane along $\vec{e}_3$ and is orthogonal to $\vec{e}_1$ and $\vec{e}_2$.
 
 The line along $\vec{u}_1$ is equivalent to the direction where the variance is maximal. In the following, we will support our visual understanding by exploring the PCA and moment of inertia mathematically.
 "
@@ -276,7 +278,7 @@ The line along $\vec{u}_1$ is equivalent to the direction where the variance is 
 # ╔═╡ 03664f5c-d45c-11ea-21b6-91cd647a07aa
 md"## Definition of the Moment of Inertia of a Ridgid Body
 
-For a rigid object of $N$ point masses $m_i$ in $\mathbb{R}^n$, the moment of inertia tensor $\boldsymbol{J}$ is given by
+For a rigid object of $N$ point masses $m_i$ in $\mathbb{R}^n$, the moment of inertia  $\boldsymbol{J}$ is given by
 
 $$\begin{equation*}
     \boldsymbol{J} = 
@@ -496,7 +498,7 @@ md"Using Eq. (6), we can calculate the eigenvalues $\lambda_{J}$ of $\boldsymbol
 sum(λ_cov)-λ_cov[1], sum(λ_cov)-λ_cov[2], sum(λ_cov)-λ_cov[3]
 
 # ╔═╡ abbd82f5-31cc-4f45-9c7c-f401796174cb
-md"Now, we calculate the eigenvalues $\lambda_{J}$ and eigenvectors $\vec{v}$ of $\boldsymbol{J}$"
+md"## Calculating the Eigenvalues $\lambda_{J}$ and Eigenvectors $\vec{v}$ of $\boldsymbol{J}$"
 
 # ╔═╡ eaa487b9-2728-49f8-8b5e-003926f4d544
 δ(i, j) = i == j ? 1 : 0
@@ -534,7 +536,7 @@ md"For the moment of inertia matrix $\boldsymbol{J}$, we find the Eigenvalues $\
 λ, v = eigen(J; sortby=-)
 
 # ╔═╡ 1ad77ac0-bd4c-407f-858f-6e435085d4d8
-md"In both interpretations of the cloud of data points, first as a rigid body rotating around the center of mass and second as a point cloud centered around the mean, we obtain the same eigenvalues and eigenvectors."
+md"In both interpretations of the cloud of data points, first, as a point cloud-centered around the mean and second as a rigid body rotating around the center of mass, we obtain the same eigenvalues and eigenvectors."
 
 # ╔═╡ 9a7fdec6-b17b-47f1-9c81-c3d8525f227c
 scale_factor =  λ_cov[1]/λ_cov[2]
@@ -571,13 +573,13 @@ begin
 end
 
 # ╔═╡ b6c98fa0-8b40-4654-aa0c-b0204ed9e291
-md"*Figure 2. Cloud of randomly distributed data points in Euclidean space. Overlayed are the scaled eigenvectors (shown as grey arrows).*
+md"*Figure 4. Cloud of randomly distributed data points $X$. Overlayed are the scaled eigenvectors (shown as red and green arrows).*
 
 ---
 "
 
 # ╔═╡ 3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
-md"As a next step we use the eigenvectors and eigenvalues to rotate the data and represent it in the new basis $[\vec{b1}, \vec{b2}]$."
+md"As a next step we use the eigenvectors and eigenvalues to rotate the data and represent it in the new basis $v = v_{cov} = [\vec{u}_1, \vec{u}_2, \vec{u}_3]$."
 
 # ╔═╡ fd8ce478-87a8-48aa-b8d1-df80df93254b
 pts_rot = pts * v_cov
@@ -603,26 +605,41 @@ begin
 		     aspect_ratio = :equal,
 		     label="Points")
 
-	plot!( [0, sqrt(λ[1])],
-		   [0.0, 0.0],
+	plot!( [0, v_cov[1,1]*10.0],
+		   [0, v_cov[2,1]*10.0],
 		    arrow=true,color=:grey,linewidth=3,label="")
 	
-	plot!( [0, 0.0],
-		   [0, sqrt(λ[2])],
+	plot!( [0, v_cov[1,2]*10.0],
+		   [0, v_cov[2,2]*10.0],
 		    arrow=true,color=:grey,linewidth=3,label="")
 end
 
 # ╔═╡ 9a90438b-67c2-4024-bf45-696d60b718df
-md"*Figure 4. Cloud of randomly distributed data points in Euclidean space rotated and represented in the basis $\vec{b}_1$ and $\vec{b}_2$.*
+md"*Figure 4. Cloud of randomly distributed data points $X$ represented in the basis spanned by the vectors $[\vec{u}_1 \; \vec{u}_2 \; \vec{u}_3]$. The grey arrows indicate the basis vectors $\vec{e}_1$ and $\vec{e}_2$*
 
 ---
 "
 
+# ╔═╡ 14bf83f9-9a19-42e0-ba41-c6a16c58a89c
+md"""## Final Thoughts
+In machine learning and data science, PCA is used for two reasons.
+First, the accuracy and numeric stability of some Machine Learning algorithms are sensitive towards correlated input data. In particular, Machine Learning algorithms that perform an inversion of the covariance matrix may experience the singularity problem (Gaussian Mixture Models come to mind). A different example is the application of random forest algorithms to detect interactions between different features because highly correlated data can mask these interactions. Here, first performing a PCA can support and safeguard the interpretability.
+
+
+Second, it is used to reduce the dimensionality of the data set for example for data compression. In our example, we used a 3-dimension dataset $X$, however, the $\vec{e}_3$ component by construction does not carry any information. We, therefore, could use the PCA, to drop the third dimension and use the projection of the data on the $\vec{u}_1 \times \vec{u}_2$ only. This becomes a powerful tool to handle high-dimensional data and deal with the [curse of dimensionality](https://en.wikipedia.org/wiki/Curse_of_dimensionality).
+
+Both applications of PCA have been extensively discussed. Below you find recommendations for further reading.
+
+"""
+
 # ╔═╡ 3b409a8a-b03a-41e6-9e14-b9f73af1847b
 md"## Further Reading
-  1. Bauckhage, Christian & Dong, Tiansi. (2018). A Tutorial on Principal Component Analysis Part 1: Motivation.
-  2. Bauckhage, Christian & Dong, Tiansi. (2018). A Tutorial on Principal Component Analysis Part 2: Principal Axis via Moment of Inertia.
-  3. Hong, Liang. (2014). The Proof of Equivalence between \" Moment of Inertia Based Method\" and \"PCA Based Method\" in LOS Detection. Advanced Materials Research. 945-949. 2071-2074. 10.4028/www.scientific.net/AMR.945-949.2071."
+  1. **Bauckhage, Christian & Dong, Tiansi** A Tutorial on Principal Component Analysis Part 1: Motivation (2018).
+  2. **Bauckhage, Christian & Dong, Tiansi** A Tutorial on Principal Component Analysis Part 2: Principal Axis via Moment of Inertia (2018).
+  3. **Hong, Liang** [The Proof of Equivalence between \" Moment of Inertia Based Method\" and \"PCA Based Method\" in LOS Detection](10.4028/www.scientific.net/AMR.945-949.2071) Advanced Materials Research. 945-949. 2071-2074 (2014).
+  4. **Murphy, Kevin P.** [Machine Learning A Probabilistic Perspective](https://isbnsearch.org/isbn/9780262018029), The MIT Press, Chapter 12.2 (2012)
+  5. **Marsland, Stephen** [Machine Learning An Algorithmic Perspective](https://isbnsearch.org/isbn/9781466583283), 2nd Edition, Chapman and Hall/CRC (2014)
+  6. [Badr, Will](https://medium.com/@will.badr) [Why Feature Correlation Matters …. A Lot!](https://towardsdatascience.com/why-feature-correlation-matters-a-lot-847e8ba439c4) Blog TowardsDataScience (2019)."
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1586,13 +1603,14 @@ version = "0.9.1+5"
 # ╟─1ad77ac0-bd4c-407f-858f-6e435085d4d8
 # ╠═9a7fdec6-b17b-47f1-9c81-c3d8525f227c
 # ╟─2f593024-6533-489e-928e-ed91ea382396
-# ╟─e54b7b64-ebbe-426d-92fa-4959eebba826
+# ╠═e54b7b64-ebbe-426d-92fa-4959eebba826
 # ╟─b6c98fa0-8b40-4654-aa0c-b0204ed9e291
 # ╟─3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
-# ╟─fd8ce478-87a8-48aa-b8d1-df80df93254b
+# ╠═fd8ce478-87a8-48aa-b8d1-df80df93254b
 # ╟─8d9840d1-1e71-403b-8935-c6aeca8a0ee0
 # ╟─2be79841-4bfd-47d1-9c50-fd1e33a766c5
 # ╟─9a90438b-67c2-4024-bf45-696d60b718df
+# ╟─14bf83f9-9a19-42e0-ba41-c6a16c58a89c
 # ╟─3b409a8a-b03a-41e6-9e14-b9f73af1847b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
