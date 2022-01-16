@@ -181,7 +181,7 @@ begin
 end
 
 # ╔═╡ 075b42b8-476b-4436-a886-dcbb082b0ad7
-md"*Figure 1. a) Distribution of random points along $\vec{e}_2$. b) Cloud of randomly distributed data points in Euclidean space $\mathbb{R}^3$ with coordinates $\{ \vec{x}^{(1)}, \vec{x}^{(2)},\dots, \vec{x}^{(N)} \}$ with the basis vectors (axis in the plot b)) $\vec{e}_1$ and $\vec{e}_2$. The grey lines in plot b) indicate the principal axis $\vec{u}_1$ and $\vec{u}_2$. c) Distribution of random points along $\vec{e}_1$. All values along $\vec{e}_3$ are equal zero.*
+md"*Figure 1. a) Histogram of the random points distributed along $\vec{e}_2$. b) Cloud of randomly distributed data points in Euclidean space $\mathbb{R}^3$ with coordinates $\{ \vec{x}^{(1)}, \vec{x}^{(2)},\dots, \vec{x}^{(N)} \}$ with the basis vectors (axis in the plot b)) $\vec{e}_1$ and $\vec{e}_2$. The grey lines in plot b) indicate the principal axis $\vec{u}_1$ and $\vec{u}_2$. c) Histogram of the random points distributed along $\vec{e}_1$. All values along $\vec{e}_3$ are equal zero.*
 
 ---
 "
@@ -270,7 +270,7 @@ md" *Figure 3. a) PCA: The first principal component $\vec{u}_1$ is along the ax
 # ╔═╡ 2f20596e-efa9-4d00-9769-6e8689c99f05
 md"With the visual support of *Figure 1* and *3*, we expect that the principal axes of the PCA and Moment of Inertia are the same. However, the value of the largest principal component and principal moment of inertia will differ for most sets of data points.
 
-> *Note:* In physics, the moment of inertia is defined for a $3$-dimensional rigid body. For simplicity, we projected the data into the plane spanned by $\vec{e}_1$ and $\vec{e}_2$. In our example, the plane with the maximal spread of mass points is then spaned by $\vec{e}_1 \times \vec{e}_2$. The principal axis corresponding to the largest moment is pointing out of the plane along $\vec{e}_3$ and is orthogonal to $\vec{e}_1$ and $\vec{e}_2$.
+> *Note:* In physics, the moment of inertia is defined for a $3$-dimensional rigid body. For simplicity, we projected the data into the plane spanned by $\vec{e}_1$ and $\vec{e}_2$. In our example, the plane with the maximal spread of mass points is then spaned by $\vec{e}_1 and \vec{e}_2$. The principal axis corresponding to the largest moment is pointing out of the plane along $\vec{e}_3$ and is orthogonal to $\vec{e}_1$ and $\vec{e}_2$.
 
 The line along $\vec{u}_1$ is equivalent to the direction where the variance is maximal. In the following, we will support our visual understanding by exploring the PCA and moment of inertia mathematically.
 "
@@ -300,10 +300,9 @@ $$\begin{equation}
 
 where $\delta_{j,j'}$ is the Kronecker delta and $M = \sum_{i}^{N} m_i$ is the total mass.
 
-> *Note:* Here, we normalise the moment of inertia by the total mass. In physics, the moment of inertia would not commonly be normalised like this.
+> *Note:* Here, we normalize the moment of inertia by the total mass. In physics, the moment of inertia would not commonly be normalized like this.
 
 Looking closer, we see that $\boldsymbol{J}$ is symmetric with $J_{j,j'} = J_{j',j}$. The spectral theorem tells us that $\boldsymbol{J}$ has real eigenvalues $\lambda$ and is diagonalisable by an orthogonal matrix (orthogonally diagonalizable).
-
 "
 
 # ╔═╡ 2e1aa912-e7bd-4ffd-8060-05556a77bc8b
@@ -533,7 +532,7 @@ end
 J = calcJ(pts)
 
 # ╔═╡ 51f20ae2-e0b6-410d-8783-689f6de9a025
-md"For the moment of inertia matrix $\boldsymbol{J}$, we find the Eigenvalues $\lambda$ and the eigenvectors $v$"
+md"For the moment of inertia matrix $\boldsymbol{J}$, we find the eigenvalues $\lambda$ and the eigenvectors $v$"
 
 # ╔═╡ 4b47a6af-3c41-4575-a576-09145c535e22
 λ, v = eigen(J; sortby=-)
@@ -610,7 +609,7 @@ begin
 end
 
 # ╔═╡ 9a90438b-67c2-4024-bf45-696d60b718df
-md"*Figure 4. Cloud of randomly distributed data points $X$ represented in the basis spanned by the vectors $[\vec{u}_1 \; \vec{u}_2 \; \vec{u}_3]$. The grey arrows indicate the old basis vectors $\vec{e}_1$ and $\vec{e}_2$ in this new basis.*
+md"*Figure 5. Cloud of randomly distributed data points $X$ represented in the basis spanned by the vectors $[\vec{u}_1 \; \vec{u}_2 \; \vec{u}_3]$. The grey arrows indicate the old basis vectors $\vec{e}_1$ and $\vec{e}_2$ in this new basis.*
 
 ---
 "
@@ -1577,7 +1576,7 @@ version = "0.9.1+5"
 # ╟─1d1d7052-977e-4180-af75-f1171f1492b2
 # ╟─48d9a159-5725-4c8d-8a3f-334c0f6e24cf
 # ╟─9e8ce452-78bc-4f1c-95fa-37be90c1006c
-# ╠═d3eb6336-9e2e-4503-8fa1-f49385b45b40
+# ╟─d3eb6336-9e2e-4503-8fa1-f49385b45b40
 # ╟─a3da380d-b7db-4b7d-a348-bf3ef9b59e04
 # ╟─96b8d373-3ce1-460a-a70c-3f9e026bb783
 # ╟─42c9d5b9-7939-4f1f-b148-c9347acb3b3d
