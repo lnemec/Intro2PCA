@@ -39,7 +39,7 @@ end
 # ╔═╡ 969a133a-9861-4248-92f0-757fd12f12fb
 md"# Principal Component Analysis (PCA): *A Physically Intuitive Mathematical Introduction*
 
-The principal component analysis (PCA) involves rotating a cloud of data points in Euclidean space such that the variance is maximal along the first axis (the so-called first principal component). The principal axis theorem ensures that the data can be rotated in such away. In mathematical terms, the PCA is a coordinate transformation, or equivalently, a change of basis or orthogonal linear transformation.
+The principal component analysis (PCA) involves rotating a cloud of data points in Euclidean space such that the variance is maximal along the first axis, the so-called first principal component. The principal axis theorem ensures that the data can be rotated in such away. In mathematical terms, the PCA involves finding an orthogonal linear coordinate transformation or, more generally, a new basis.
 
 The mathematics behind the PCA is found again in the description of rotations of rigid bodies. This physical interpretation is instructive in understanding the PCA."
 
@@ -193,7 +193,7 @@ The moment of inertia $\boldsymbol{J}$ of a rigid body, also called rotational i
 
 All moments of inertia of a rigid body can be summarised by a matrix. In general, it can be determined with respect to any point in space. For simplicity, we will calculate the moment of inertia with respect to the center of mass.
 
-The principal axes of the body, also known as figure axes, and the principal moments of inertia can be found by rotating the cloud of point masses. In mathematical terms, the principal moments are calculated by a coordinate transformation, or equivalently, a change of basis or orthogonal linear transformation.
+The principal axes of the body, also known as figure axes, and the principal moments of inertia can be found by rotating the cloud of point masses. In mathematical terms, the PCA involves finding an orthogonal linear coordinate transformation or, more generally, a new basis.
 
 The figure axis corresponding to the largest principal moment of inertia is the area vector of the plane with the maximal spread of mass points.
 
@@ -203,7 +203,7 @@ The figure axis corresponding to the largest principal moment of inertia is the 
 "
 
 # ╔═╡ 9ee5e06b-318b-4750-82bb-9db2999f2d1e
-md"## Visual Comparison of the Principal Axis in PCA and Moment of Inertia
+md"## Visual Comparison of the Principal Axis in PCA and the Moment of Inertia
 
 In the following, we will interpret the set of random data points from above in two ways. First, we interpret the data points $X$ as statistically distributed data with Covariance matrix $\boldsymbol{C}$. Second, $X$ represents a set of point masses representing a rigid body with the Moment of Inertia matrix $\boldsymbol{J}$. 
 
@@ -276,7 +276,7 @@ The line along $\vec{u}_1$ is equivalent to the direction where the variance is 
 "
 
 # ╔═╡ 03664f5c-d45c-11ea-21b6-91cd647a07aa
-md"## Definition of the Moment of Inertia of a Ridgid Body
+md"## Definition of the Moment of Inertia of a Rigid Body
 
 For a rigid object of $N$ point masses $m_i$ in $\mathbb{R}^n$, the moment of inertia  $\boldsymbol{J}$ is given by
 
@@ -332,7 +332,7 @@ $$\begin{equation}
 # ╔═╡ 8c8167ca-8679-4d2a-b15b-4c8f32cfb8b6
 md"## Solving the Eigenvalue Problem
 
-The principal axes of the PCA and moment of inertia can be determined by rotating the data points in space. More precisely, the principal components and axes are calculated by a coordinate transformation, or equivalently, a change of basis or orthogonal linear transformation.
+The principal axes of the PCA and moment of inertia can be determined by rotating the data points in space. More precisely, the principal components and axes are calculated by solving an eigenvalue problem.
 
 A real symmetric matrix (like $\boldsymbol{C}$ and $\boldsymbol{J}$ ) has the eigendecomposition into the product of a rotation matrix $\boldsymbol{R}$ and a diagonal matrix $\boldsymbol{\Lambda}$
 
@@ -356,7 +356,7 @@ The structure of the matrices $\boldsymbol{J}$ and $\boldsymbol{C}$ is the same 
 "
 
 # ╔═╡ 1d1d7052-977e-4180-af75-f1171f1492b2
-md"## Showing the Equivalency of the Eigenvectors of $\boldsymbol{C}$ and $\boldsymbol{J}$
+md"## Showing the Equality of the Eigenvectors of $\boldsymbol{C}$ and $\boldsymbol{J}$
 
 Let's rewrite the moment of inertia matrix $\boldsymbol{J}$ defined by Eq. (1) in terms of the covariance matrix $\boldsymbol{C}$ in Eq. (2).
 
@@ -407,7 +407,7 @@ $$\begin{equation*}
             0  & \lambda^{2}_{cov} & 0 \\
             0 & 0 & \lambda^{3}_{cov}
         \end{bmatrix}
-\end{equation*}$$.
+\end{equation*}$$
 
 
 The $j^{th}$ eigenvector $\vec{v}^{j}$ and $j^{th}$ eigenvalue $\lambda^{j}_{cov}$ of the covariance matrix $\boldsymbol{C}$ are given by
@@ -416,7 +416,7 @@ $$\begin{equation}
     \boldsymbol{C}\lambda^{j}_{cov} = \lambda^{j}_{cov} \vec{v}^{j}.
 \end{equation}$$
 
-In the following, we will drop the index $j$ and rewrite the formula from above to $\boldsymbol{C}\lambda_{cov} = \lambda_{cov} \vec{v}$. We multiply equation Eq. (3) by the eigenvector $\vec{v}$ from the right side.
+In the following, we will drop the index $j$ and rewrite the formula from above as $\boldsymbol{C}\lambda_{cov} = \lambda_{cov} \vec{v}$. Multiplying equation Eq. (3) by the eigenvector $\vec{v}$ from the right side, we find Eq. (4).
 
 $$\begin{align}
     \boldsymbol{J}\vec{v} &= \left( tr(\boldsymbol{C})\boldsymbol{I} - \boldsymbol{C} \right) \vec{v}  \\
@@ -431,44 +431,44 @@ $$\begin{align}
     &= \lambda_{J} \vec{v} \qquad \qquad \qquad \qquad \text{Eq. (4)}\\
 \end{align}$$
 
-From Eq. (4), we see that $\boldsymbol{C}$ and $\boldsymbol{J}$ have the same eigenvectors $\vec{v}$.
+Eq. (4) implies that $\boldsymbol{C}$ and $\boldsymbol{J}$ have the same eigenvectors $\vec{v}$.
 "
 
 # ╔═╡ 9e8ce452-78bc-4f1c-95fa-37be90c1006c
 md"## Calculating the Eigenvalues of the Moment of Inertia Matrix
 
-Based on Eq. (4), we first need to make a small side calculation:
+While the eigenvectors of $\boldsymbol{C}$ and $\boldsymbol{J}$ are the same, the eigenvalues are not the same. To relate them we will need to note that
 
-$tr\left( \boldsymbol{C} \right)= tr \left( \boldsymbol{R} \boldsymbol{\Lambda}_{cov} \boldsymbol{R}^T \right)$
+$tr\left( \boldsymbol{C} \right)= tr \left( \boldsymbol{R} \boldsymbol{\Lambda}_{cov} \boldsymbol{R}^T \right) = \sum_{j=1}^{n} \lambda^{j}_{cov} \qquad \quad \text{Eq. (5)}$
 
-The trace of a matrix is invariant under cyclic permutations
+where we have used that the trace of a matrix is invariant under cyclic permutations, so
 
 $$
 \begin{align}
     tr \left( \boldsymbol{R} \boldsymbol{\Lambda}_{cov} \boldsymbol{R}^T \right) &= 
     tr \left( \boldsymbol{R}^T \boldsymbol{R} \boldsymbol{\Lambda}_{cov} \right)\\
     &= tr \left( \boldsymbol{I} \boldsymbol{\Lambda}_{cov} \right) \\
-    &= \sum_{j=1}^{n} \lambda^{j}_{cov} \qquad \quad \text{Eq. (5)}
+    &= \sum_{j=1}^{n} \lambda^{j}_{cov}
 \end{align}$$
 
 "
 
 # ╔═╡ d3eb6336-9e2e-4503-8fa1-f49385b45b40
-md"From Eq. (4) and Eq. (5), we can calculate the eigenvalues $\lambda_{J}$ of the moment of inertia $\boldsymbol{J}$ (Eq. (1)).
+md"Using Eq. (4) and Eq. (5), we can write the eigenvalues $\lambda_{J}$ of the moment of inertia $\boldsymbol{J}$ (Eq. (1)) as
 
 $$\begin{align}
     \lambda^{k}_{J} &= tr(\boldsymbol{C}) - \lambda^{k}_{cov} \\
     &= \sum_{j=1}^{n} \lambda^{j}_{cov} - \lambda^{k}_{cov} \qquad \text{Eq. (6)}
   \end{align}$$
 
-We see that the $k^{th}$ eigenvalue $\lambda^{k}_{J}$ can be calculated from the eigenvalues $\Lambda_{cov}$.
+We see that the $k^{th}$ eigenvalue $\lambda^{k}_{J}$ can be expressed in terms of the eigenvalues $\lambda_{cov}$.
 "
 
 # ╔═╡ 96b8d373-3ce1-460a-a70c-3f9e026bb783
-md"## Calculating eigenvalues and eigenvectors using the dataset $X$"
+md"## Calculating Eigenvalues and Eigenvectors Using the Above Dataset $X$"
 
 # ╔═╡ 42c9d5b9-7939-4f1f-b148-c9347acb3b3d
-md"In the following, we calculate the covariance matrix and its eigenvalues and eigenvectors. The covariance matrix $\boldsymbol{C}$ of the dataset $X$ is"
+md"Next, we calculate covariance matrix elements, eigenvalues, and eigenvectors. The covariance matrix $\boldsymbol{C}$ of the dataset $X$ is"
 
 # ╔═╡ cbdf4dd7-5710-47d9-91aa-8dbae9712e26
 C = cov(pts; corrected=false)
@@ -507,7 +507,7 @@ md"## Calculating the Eigenvalues $\lambda_{J}$ and Eigenvectors $\vec{v}$ of $\
 """
 	calcJ(pts::AbstractMatrix)
 
-Function to calculate the moment of inertia matrix ``\\boldsymbol{J}``
+Calculates the moment of inertia matrix ``\\boldsymbol{J}`` given a set of points `pts`
 """
 function calcJ(pts::AbstractMatrix)
 	N, n = size(pts)
@@ -536,19 +536,11 @@ md"For the moment of inertia matrix $\boldsymbol{J}$, we find the Eigenvalues $\
 λ, v = eigen(J; sortby=-)
 
 # ╔═╡ 1ad77ac0-bd4c-407f-858f-6e435085d4d8
-md"In both interpretations of the cloud of data points, first, as a point cloud-centered around the mean and second as a rigid body rotating around the center of mass, we obtain the same eigenvalues and eigenvectors."
-
-# ╔═╡ 9a7fdec6-b17b-47f1-9c81-c3d8525f227c
-scale_factor =  λ_cov[1]/λ_cov[2]
-
-# ╔═╡ 2f593024-6533-489e-928e-ed91ea382396
-md"---
-**Plotting the Unit Vectors Scaled by the Scale Factor**
-"
+md"In both interpretations of the cloud of data points -- first as a cloud of points centered around the mean and second as a rigid body rotating around the center of mass -- we obtain the same eigenvectors."
 
 # ╔═╡ e54b7b64-ebbe-426d-92fa-4959eebba826
 begin
-    p1 = plot(title = "Random selection of points",
+    p1 = plot(title = "Dataset and the (Scaled up) Eigenvectors",
 	         xlims = (-3 * Rmax, 3 * Rmax),
 	         ylims = (-3 * Rmax, 3 * Rmax) )
 	
@@ -579,7 +571,7 @@ md"*Figure 4. Cloud of randomly distributed data points $X$. Overlayed are the s
 "
 
 # ╔═╡ 3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
-md"As a next step we use the eigenvectors and eigenvalues to rotate the data and represent it in the new basis $v = v_{cov} = [\vec{u}_1, \vec{u}_2, \vec{u}_3]$."
+md"Next, we use the eigenvectors and eigenvalues to rotate the data and represent it in the new basis $v = v_{cov} = [\vec{u}_1, \vec{u}_2, \vec{u}_3]$."
 
 # ╔═╡ fd8ce478-87a8-48aa-b8d1-df80df93254b
 pts_rot = pts * v_cov
@@ -591,7 +583,7 @@ md"
 
 # ╔═╡ 2be79841-4bfd-47d1-9c50-fd1e33a766c5
 begin
-    p2 = plot(title = "Random selection of points",
+    p2 = plot(title = "Rotated Dataset",
 	         xlims = (-3 * Rmax, 3 * Rmax),
 	         ylims = (-3 * Rmax, 3 * Rmax) )
 	
@@ -615,7 +607,7 @@ begin
 end
 
 # ╔═╡ 9a90438b-67c2-4024-bf45-696d60b718df
-md"*Figure 4. Cloud of randomly distributed data points $X$ represented in the basis spanned by the vectors $[\vec{u}_1 \; \vec{u}_2 \; \vec{u}_3]$. The grey arrows indicate the basis vectors $\vec{e}_1$ and $\vec{e}_2$*
+md"*Figure 4. Cloud of randomly distributed data points $X$ represented in the basis spanned by the vectors $[\vec{u}_1 \; \vec{u}_2 \; \vec{u}_3]$. The grey arrows indicate the old basis vectors $\vec{e}_1$ and $\vec{e}_2$ in this new basis.*
 
 ---
 "
@@ -623,12 +615,12 @@ md"*Figure 4. Cloud of randomly distributed data points $X$ represented in the b
 # ╔═╡ 14bf83f9-9a19-42e0-ba41-c6a16c58a89c
 md"""## Final Thoughts
 In machine learning and data science, PCA is used for two reasons.
-First, the accuracy and numeric stability of some Machine Learning algorithms are sensitive towards correlated input data. In particular, Machine Learning algorithms that perform an inversion of the covariance matrix may experience the singularity problem (Gaussian Mixture Models come to mind). A different example is the application of random forest algorithms to detect interactions between different features because highly correlated data can mask these interactions. Here, first performing a PCA can support and safeguard the interpretability.
+First, the accuracy and numeric stability of some Machine Learning algorithms are sensitive to correlated input data. In particular, Machine Learning algorithms that perform an inversion of the covariance matrix may experience the singularity problem -- Gaussian Mixture Models come to mind. A different example is the application of random forest algorithms to detect interactions between different features, where large correlations can mask these interactions. Performing a PCA first allows us to tease out the effect of correlations, which can improve feature importance analysis.
 
 
-Second, it is used to reduce the dimensionality of the data set for example for data compression. In our example, we used a 3-dimension dataset $X$, however, the $\vec{e}_3$ component by construction does not carry any information. We, therefore, could use the PCA, to drop the third dimension and use the projection of the data on the $\vec{u}_1 \times \vec{u}_2$ only. This becomes a powerful tool to handle high-dimensional data and deal with the [curse of dimensionality](https://en.wikipedia.org/wiki/Curse_of_dimensionality).
+Second, PCA is used to reduce the dimensionality of the dataset, e.g. for data compression. In our example, we used a 3-dimensional dataset $X$, but the $\vec{e}_3$ component did not carry any information (by construction). We could have used a PCA to justify dropping the third dimension since a PCA would have shown that the variance is minimal in the $\vec{e}_3$ direction. Using the projection of a higher dimensional dataset onto a lower-dimensional space like this is a powerful tool to handle high-dimensional data and deal with the [curse of dimensionality](https://en.wikipedia.org/wiki/Curse_of_dimensionality).
 
-Both applications of PCA have been extensively discussed. Below you find recommendations for further reading.
+Both applications of PCA have been extensively discussed. See recommendations for further reading below.
 
 """
 
@@ -1565,7 +1557,7 @@ version = "0.9.1+5"
 # ╟─721e5d79-4842-43cf-a2ff-4cf0fdb13f87
 # ╟─969a133a-9861-4248-92f0-757fd12f12fb
 # ╟─624fcb2a-8446-42c2-863f-e285f2c1fd86
-# ╠═d8005539-13d5-4a3a-ad62-861c4f4bb9e0
+# ╟─d8005539-13d5-4a3a-ad62-861c4f4bb9e0
 # ╟─5619b1f9-38d1-42de-bd81-708567e2fa96
 # ╟─24f9bdd6-0337-4a23-9373-cfecabc2b029
 # ╟─eacd1340-79af-4985-bf60-b8db8a380a20
@@ -1591,21 +1583,19 @@ version = "0.9.1+5"
 # ╟─4b17638d-1465-4b21-a2a3-61f94cbd0bca
 # ╠═19378277-61f3-4d59-b840-452cfdf58a3b
 # ╟─30513f7e-d866-4078-95e2-ab05bfbcf547
-# ╠═32191a9f-14ed-4bf6-a8ea-6586b117e848
+# ╟─32191a9f-14ed-4bf6-a8ea-6586b117e848
 # ╟─11c37b73-ddfd-41cf-98f4-c461b265d1bf
 # ╠═b20fed20-a678-450b-a689-a51baa337153
 # ╟─abbd82f5-31cc-4f45-9c7c-f401796174cb
-# ╟─eaa487b9-2728-49f8-8b5e-003926f4d544
+# ╠═eaa487b9-2728-49f8-8b5e-003926f4d544
 # ╟─3e6282ce-f3ba-4591-976d-0c37d14755c7
 # ╠═6b58bfb2-be89-4cd2-9c67-85ca95d02267
 # ╟─51f20ae2-e0b6-410d-8783-689f6de9a025
 # ╠═4b47a6af-3c41-4575-a576-09145c535e22
 # ╟─1ad77ac0-bd4c-407f-858f-6e435085d4d8
-# ╠═9a7fdec6-b17b-47f1-9c81-c3d8525f227c
-# ╟─2f593024-6533-489e-928e-ed91ea382396
 # ╟─e54b7b64-ebbe-426d-92fa-4959eebba826
 # ╟─b6c98fa0-8b40-4654-aa0c-b0204ed9e291
-# ╟─3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
+# ╠═3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
 # ╠═fd8ce478-87a8-48aa-b8d1-df80df93254b
 # ╟─8d9840d1-1e71-403b-8935-c6aeca8a0ee0
 # ╟─2be79841-4bfd-47d1-9c50-fd1e33a766c5
