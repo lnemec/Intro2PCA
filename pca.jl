@@ -396,7 +396,7 @@ $\boldsymbol{C} = \boldsymbol{R} \boldsymbol{\Lambda}_{cov} \boldsymbol{R}^T,$
 
 where $\boldsymbol{R}$ is composed of the eigenvectors $\vec{v}^{j}$. In the case of a $3$-dimensional space
 
-$\boldsymbol{R} = \left[ \vec{v}^{1} \; \vec{v}^{2} \; \vec{v}^{2} \right]$
+$\boldsymbol{R} = \left[ \vec{v}^{1} \; \vec{v}^{2} \; \vec{v}^{3} \right]$
 
 and
 
@@ -463,6 +463,9 @@ $$\begin{align}
 
 We see that the $k^{th}$ eigenvalue $\lambda^{k}_{J}$ can be expressed in terms of the eigenvalues $\lambda_{cov}$.
 "
+
+# ╔═╡ a3da380d-b7db-4b7d-a348-bf3ef9b59e04
+md"""Physically we can gain an intuitive understanding for the relation between these two sets of eigenvalues by considering that the covariance eigenvalue along e.g. axis $\vec{v}^{(1)}$ are determined by the component of the data points in $(1)$ direction, while the moment of inertia around for a rotation around the axis $(1)$ is determined by the euclidean distance of the data points from that axis."""
 
 # ╔═╡ 96b8d373-3ce1-460a-a70c-3f9e026bb783
 md"## Calculating Eigenvalues and Eigenvectors Using the Above Dataset $X$"
@@ -1574,7 +1577,8 @@ version = "0.9.1+5"
 # ╟─1d1d7052-977e-4180-af75-f1171f1492b2
 # ╟─48d9a159-5725-4c8d-8a3f-334c0f6e24cf
 # ╟─9e8ce452-78bc-4f1c-95fa-37be90c1006c
-# ╟─d3eb6336-9e2e-4503-8fa1-f49385b45b40
+# ╠═d3eb6336-9e2e-4503-8fa1-f49385b45b40
+# ╟─a3da380d-b7db-4b7d-a348-bf3ef9b59e04
 # ╟─96b8d373-3ce1-460a-a70c-3f9e026bb783
 # ╟─42c9d5b9-7939-4f1f-b148-c9347acb3b3d
 # ╠═cbdf4dd7-5710-47d9-91aa-8dbae9712e26
@@ -1587,7 +1591,7 @@ version = "0.9.1+5"
 # ╟─11c37b73-ddfd-41cf-98f4-c461b265d1bf
 # ╠═b20fed20-a678-450b-a689-a51baa337153
 # ╟─abbd82f5-31cc-4f45-9c7c-f401796174cb
-# ╠═eaa487b9-2728-49f8-8b5e-003926f4d544
+# ╟─eaa487b9-2728-49f8-8b5e-003926f4d544
 # ╟─3e6282ce-f3ba-4591-976d-0c37d14755c7
 # ╠═6b58bfb2-be89-4cd2-9c67-85ca95d02267
 # ╟─51f20ae2-e0b6-410d-8783-689f6de9a025
@@ -1595,7 +1599,7 @@ version = "0.9.1+5"
 # ╟─1ad77ac0-bd4c-407f-858f-6e435085d4d8
 # ╟─e54b7b64-ebbe-426d-92fa-4959eebba826
 # ╟─b6c98fa0-8b40-4654-aa0c-b0204ed9e291
-# ╠═3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
+# ╟─3c8c50dc-7b25-48d3-84f2-c2e1a9fb85dd
 # ╠═fd8ce478-87a8-48aa-b8d1-df80df93254b
 # ╟─8d9840d1-1e71-403b-8935-c6aeca8a0ee0
 # ╟─2be79841-4bfd-47d1-9c50-fd1e33a766c5
